@@ -25,7 +25,7 @@ export class ClassEvent {
 
             this._events[eventName].forEach(fn =>{
 
-                fn.apply(null, args); //apply = executa 
+                fn.apply(null, args); //apply = permite que você chame uma função com um determinado valor e argumentos fornecidos como um array 
 
             });
 
