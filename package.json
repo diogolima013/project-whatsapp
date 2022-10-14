@@ -19,6 +19,8 @@
   },
   "homepage": "https://github.com/diogolima013/project-whatsapp#readme",
   "dependencies": {
+    "@firebase/firestore": "^3.7.1",
+    "firebase": "7.15.5",
     "pdfjs-dist": "^2.0.489",
     "webpack": "^3.1.0",
     "webpack-dev-server": "^2.5.1"
