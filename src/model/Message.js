@@ -75,11 +75,11 @@ export class Message extends Model{
                                 </div>
                             </div>
                             <div class="_1lC8v">
-                                <div dir="ltr" class="_3gkvk selectable-text invisible-space copyable-text">Nome do Contato Anexado</div>
+                                <div dir="ltr" class="_3gkvk selectable-text invisible-space copyable-text">${this.content.name}</div>
                             </div>
                             <div class="_3a5-b">
                                 <div class="_1DZAH" role="button">
-                                    <span class="message-time">_${Format.timeStampToTime(this.timeStamp)}</span>
+                                    <span class="message-time">${Format.timeStampToTime(this.timeStamp)}</span>
                                     
                                 </div>
                             </div>
@@ -92,6 +92,12 @@ export class Message extends Model{
                 </div>
             
                 `;
+
+                if (this.content.photo){
+                    let img = div.querySelector('.photo-contact-sended');
+                    img.src = this.content.photo
+                    img.show();
+                }
             break;
 
             case 'image':
@@ -122,7 +128,7 @@ export class Message extends Model{
                            
                             <div class="_2TvOE">
                                 <div class="_1DZAH text-white" role="button">
-                                    <span class="message-time">_${Format.timeStampToTime(this.timeStamp)}</span>
+                                    <span class="message-time">${Format.timeStampToTime(this.timeStamp)}</span>
                                 </div>
                             </div>
                         </div>
@@ -185,7 +191,7 @@ export class Message extends Model{
                         </div>
                         <div class="_3Lj_s">
                             <div class="_1DZAH" role="button">
-                                <span class="message-time">_${Format.timeStampToTime(this.timeStamp)}</span>
+                                <span class="message-time">${Format.timeStampToTime(this.timeStamp)}</span>
                             </div>
                         </div>
                     </div>
@@ -263,7 +269,7 @@ export class Message extends Model{
                         </div>
                         <div class="_27K_5">
                             <div class="_1DZAH" role="button">
-                                <span class="message-time">_${Format.timeStampToTime(this.timeStamp)}</span>
+                                <span class="message-time">${Format.timeStampToTime(this.timeStamp)}</span>
                             </div>
                         </div>
                     </div>
@@ -330,7 +336,7 @@ export class Message extends Model{
 
         }, err =>{
             
-            console.error(err);
+            f(err);
 
         }, ()=>{
 
@@ -346,6 +352,12 @@ export class Message extends Model{
 
  }
 
+    static sendContact(chatId, from, contact){
+
+        return Message.send(chatId, from, 'contact', contact);
+
+    }
+
     static sendDocument(chatId, from, file, filePreview, info){
 
         Message.send(chatId, from, 'document', '').then(msgRef =>{
@@ -358,11 +370,11 @@ export class Message extends Model{
 
                     Message.upload(filePreview, from).then(downloadURL2 =>{
 
-                    let dowloadPreview = downloadURL2;
+                    let downloadPreview = downloadURL2;
         
                     msgRef.set({
                         content: downloadFile,
-                        preview: dowloadPreview,
+                        preview: downloadPreview,
                         filename: file.name,
                         size: file.size,
                         fileType: file.type,
@@ -391,8 +403,8 @@ export class Message extends Model{
             });
 
         });
+     
     }
-
 
     static sendImage(chatId, from, file){
 

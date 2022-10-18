@@ -7,6 +7,7 @@ import { User } from '../model/User';
 import { Chat } from '../model/Chat';
 import { Message } from '../model/Message';
 import { Base64 } from "../util/base64";
+import { ContactsController } from './ContactsController';
 
 export class WhatsAppController {
 
@@ -200,6 +201,8 @@ export class WhatsAppController {
 
                 let me = (data.from === this._user.email);
 
+                let view = message.getViewElement(me);
+
                 if (!this.el.panelMessagesContainer.querySelector('#_' + data.id))
                 { 
 
@@ -212,17 +215,15 @@ export class WhatsAppController {
                     });
 
                 }
-                    
-                let view = message.getViewElement(me);
-
+ 
                 this.el.panelMessagesContainer.appendChild(view);
 
                 } else {
-                    
-                    let view = message.getViewElement(me);
 
-                    this.el.panelMessagesContainer.querySelector('#_' + data.id).innerHTML = view.innerHTML;
-                    
+                    let parent = this.el.panelMessagesContainer.querySelector('#_' + data.id).parentNode; //parentNode tras o pai imediato
+
+                    parent.replaceChild(view, this.el.panelMessagesContainer.querySelector('#_' + data.id )); //trocando o conteúdo antigo, sem sequer "excluir"
+
                 }
                 
                 
@@ -234,6 +235,33 @@ export class WhatsAppController {
 
                 }
 
+                if (message.type === 'contact'){
+
+                    view.querySelector('.btn-message-send').on
+                    ('click', e =>{
+
+                        Chat.createIfNotExists(this._user.email, message.content.email).then(chat=>{
+
+                            let contact = new User(message.content.email);
+
+                            contact.on('datachange', data=>{
+
+                                contact.chatId = chat.id;
+
+                                this._user.addContact(contact);
+    
+                                this._user.chatId = chat.id;
+        
+                                contact.addContact(this._user);
+        
+                                this.setActiveChat(contact);
+
+                            });
+                        });
+
+                     });
+                
+                 }       
             });
 
             if(autoScroll) {
@@ -534,7 +562,7 @@ export class WhatsAppController {
 
             this.el.btnSendPicture.disable = true;
 
-            let regex = /^data:(.+);base64,(.*)$/; //expressão
+            let regex = /^data:(.+);base64,(.*)$/; 
             let result = this.el.pictureCamera.src.match(regex);
             let mimeType =  result[1];
             let ext = mimeType.split('/')[1];
@@ -672,7 +700,7 @@ export class WhatsAppController {
 
                     Message.sendDocument(
                         this._contactActive.chatId, 
-                        this._user.name, file, filePreview, this.el.infoPanelDocumentPreview.innerHTML);
+                        this._user.email, file, filePreview, this.el.infoPanelDocumentPreview.innerHTML);
 
                 });
 
@@ -680,7 +708,7 @@ export class WhatsAppController {
 
                 Message.sendDocument(
                     this._contactActive.chatId, 
-                    this._user.name, file);
+                    this._user.email, file);
 
             }
 
@@ -689,14 +717,27 @@ export class WhatsAppController {
         });
 
         this.el.btnAttachContact.on('click', e =>{
-            
-            this.el.modalContacts.show();
+
+            this._contactsController = new ContactsController (this.el.modalContacts, this._user );
+
+            this._contactsController.on('select' , contact=>{
+
+                Message.sendContact(
+                    this._contactActive.chatId,
+                    this._user.email,
+                    contact
+                );
+
+            });
+
+            this._contactsController.open();
 
         });
 
         this.el.btnCloseModalContacts.on('click', e =>{
 
-            this.el.modalContacts.hide();
+            this._contactsController.close();
+          
 
         });
 
